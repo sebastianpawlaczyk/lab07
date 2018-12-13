@@ -1,61 +1,63 @@
 package depot;
 
 import java.io.*;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class LinkedListDepot extends WordsDepot implements java.io.Serializable
 {
 
-    private List<String> wordsLinkedList_ = new LinkedList<>();
+    private List<WordCounter> wordsLinkedList_ = new LinkedList<>();
 
     @Override
     public void addWord(String word)
     {
-        word = word.toLowerCase();
-        wordsLinkedList_.add(word);
+        WordCounter w = new WordCounter(word);
+        int idx = wordsLinkedList_.indexOf(w);
+        if (idx < 0)
+        {
+            wordsLinkedList_.add(w);
+        }
+        else
+        {
+            w = wordsLinkedList_.get(idx);
+            w.increment();
+        }
     }
 
     @Override
     public void removeWord(String word)
     {
-        word = word.toLowerCase();
-        wordsLinkedList_.removeIf(word::equals);
-        //wordsLinkedList_.removeAll(Collections.singleton(word));
+        WordCounter w = new WordCounter(word);
+        int idx = wordsLinkedList_.indexOf(w);
+        if (!(idx < 0))
+        {
+            wordsLinkedList_.remove(idx);
+        }
     }
 
     @Override
     public int wordOccurenceCount(String word)
     {
-        int counter = 0;
-        word = word.toLowerCase();
-
-        for (String it : wordsLinkedList_)
+        WordCounter w = new WordCounter(word);
+        int idx = wordsLinkedList_.indexOf(w);
+        if (idx < 0)
         {
-            if (it.equals(word))
-            {
-                counter++;
-            }
+            return 0;
         }
-
-        return counter;
+        return wordsLinkedList_.get(idx).getCounter();
     }
 
     @Override
     public int patternOccurenceCount(String pattern)
     {
         int counter = 0;
-        pattern = pattern.toLowerCase();
-
-        for (String it : wordsLinkedList_)
+        for (WordCounter it : wordsLinkedList_)
         {
-            if (it.contains(pattern))
+            if (it.getWord().contains(pattern))
             {
-                counter++;
+                counter = counter + it.getCounter();
             }
         }
-
         return counter;
     }
 
@@ -79,35 +81,5 @@ public class LinkedListDepot extends WordsDepot implements java.io.Serializable
         in.close();
         fileIn.close();
     }
-
-    public static void main(String args[]) throws Exception
-    {
-        WordsDepot depot = new LinkedListDepot();
-
-        depot.addFile("RomanEmpire1.txt");
-        depot.addFile("RomanEmpire2.txt");
-        depot.addFile("RomanEmpire3.txt");
-        depot.addFile("RomanEmpire4.txt");
-        depot.addFile("RomanEmpire5.txt");
-        depot.addFile("RomanEmpire6.txt");
-
-        //Measure time
-        //1
-        long startTime = System.nanoTime();
-        Scanner scanner = new Scanner(new File("Nostromo.txt"));
-        scanner.useDelimiter("[^a-zA-Z]+");
-        while (scanner.hasNextLine())
-        {
-            try {
-                String word = scanner.next();
-                System.out.println(word);
-                depot.removeWord(word);
-            }catch (Exception e)
-            {
-            }
-        }
-        long endTime = System.nanoTime();
-        long resultInMilliSeconds = (endTime - startTime) / 1000000;
-        System.out.println(resultInMilliSeconds);
-    }
 }
+

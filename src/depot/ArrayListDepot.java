@@ -1,61 +1,62 @@
 package depot;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
 public class ArrayListDepot extends WordsDepot implements java.io.Serializable
 {
-    private List<String> wordsArrayList_ = new ArrayList<>();
+    private List<WordCounter> wordsArrayList_ = new ArrayList<>();
 
     @Override
     public void addWord(String word)
     {
-        word = word.toLowerCase();
-        wordsArrayList_.add(word);
+        WordCounter w = new WordCounter(word);
+        int idx = wordsArrayList_.indexOf(w);
+        if (idx < 0)
+        {
+            wordsArrayList_.add(w);
+        }
+        else
+        {
+            w = wordsArrayList_.get(idx);
+            w.increment();
+        }
     }
 
     @Override
     public void removeWord(String word)
     {
-        word = word.toLowerCase();
-        wordsArrayList_.removeIf(word::equals);
-        //wordsArrayList_.removeAll(Collections.singleton(word));
+        WordCounter w = new WordCounter(word);
+        int idx = wordsArrayList_.indexOf(w);
+        if (!(idx < 0))
+        {
+            wordsArrayList_.remove(idx);
+        }
     }
 
     @Override
     public int wordOccurenceCount(String word)
     {
-        int counter = 0;
-        word = word.toLowerCase();
-
-        for (String it : wordsArrayList_)
+        WordCounter w = new WordCounter(word);
+        int idx = wordsArrayList_.indexOf(w);
+        if (idx < 0)
         {
-            if (it.equals(word))
-            {
-                counter++;
-            }
+            return 0;
         }
-
-        return counter;
+        return wordsArrayList_.get(idx).getCounter();
     }
 
     @Override
     public int patternOccurenceCount(String pattern)
     {
         int counter = 0;
-        pattern = pattern.toLowerCase();
-
-        for (String it : wordsArrayList_)
+        for (WordCounter it : wordsArrayList_)
         {
-            if (it.contains(pattern))
+            if (it.getWord().contains(pattern))
             {
-                counter++;
+                counter = counter + it.getCounter();
             }
         }
-
         return counter;
     }
 
@@ -78,37 +79,5 @@ public class ArrayListDepot extends WordsDepot implements java.io.Serializable
         depot = (ArrayListDepot) in.readObject();
         in.close();
         fileIn.close();
-    }
-
-    public static void main(String args[]) throws Exception
-    {
-        WordsDepot depot = new ArrayListDepot();
-
-        depot.addFile("RomanEmpire1.txt");
-        depot.addFile("RomanEmpire2.txt");
-        depot.addFile("RomanEmpire3.txt");
-        depot.addFile("RomanEmpire4.txt");
-        depot.addFile("RomanEmpire5.txt");
-        depot.addFile("RomanEmpire6.txt");
-
-        //Measure time
-        //1
-        long startTime = System.nanoTime();
-        Scanner scanner = new Scanner(new File("Nostromo.txt"));
-        scanner.useDelimiter("[^a-zA-Z]+");
-        while (scanner.hasNextLine())
-        {
-            try {
-                String word = scanner.next();
-                System.out.println(word);
-                depot.removeWord(word);
-            }catch (Exception e)
-            {
-            }
-        }
-        scanner.close();
-        long endTime = System.nanoTime();
-        long resultInMilliSeconds = (endTime - startTime) / 1000000;
-        System.out.println(resultInMilliSeconds);
     }
 }

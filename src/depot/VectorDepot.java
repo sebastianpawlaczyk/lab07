@@ -1,60 +1,62 @@
 package depot;
 
 import java.io.*;
-import java.util.Scanner;
-import java.util.Vector;
+import java.util.*;
 
 public class VectorDepot extends WordsDepot implements java.io.Serializable
 {
-    public Vector<String> wordsVector_ = new Vector<>();
+    public Vector<WordCounter> wordsVector_ = new Vector<>();
 
     @Override
     public void addWord(String word)
     {
-        word = word.toLowerCase();
-        wordsVector_.add(word);
+        WordCounter w = new WordCounter(word);
+        int idx = wordsVector_.indexOf(w);
+        if (idx < 0)
+        {
+            wordsVector_.add(w);
+        }
+        else
+        {
+            w = wordsVector_.get(idx);
+            w.increment();
+        }
     }
 
     @Override
     public void removeWord(String word)
     {
-        word = word.toLowerCase();
-        wordsVector_.removeIf(word::equals);
-        //wordsVector_.removeAll(Collections.singleton(word));
+        WordCounter w = new WordCounter(word);
+        int idx = wordsVector_.indexOf(w);
+        if (!(idx < 0))
+        {
+            wordsVector_.remove(idx);
+        }
     }
 
     @Override
     public int wordOccurenceCount(String word)
     {
-        int counter = 0;
-        word = word.toLowerCase();
-
-        for (String it : wordsVector_)
+        WordCounter w = new WordCounter(word);
+        int idx = wordsVector_.indexOf(w);
+        if (idx < 0)
         {
-            if (word.equals(it))
-            {
-                counter++;
-
-            }
+            return 0;
         }
-
-        return counter;
+        return wordsVector_.get(idx).getCounter();
     }
 
     @Override
     public int patternOccurenceCount(String pattern)
     {
         int counter = 0;
-        pattern = pattern.toLowerCase();
-
-        for (String it : wordsVector_)
+        for (WordCounter it : wordsVector_)
         {
-            if (it.contains(pattern))
+            if (it.getWord().contains(pattern))
             {
-                counter++;
+                counter = counter + it.getCounter();
             }
         }
-
         return counter;
     }
 
@@ -77,37 +79,5 @@ public class VectorDepot extends WordsDepot implements java.io.Serializable
         depot = (VectorDepot) in.readObject();
         in.close();
         fileIn.close();
-    }
-
-    public static void main(String args[]) throws Exception
-    {
-        WordsDepot depot = new VectorDepot();
-
-        depot.addFile("RomanEmpire1.txt");
-        depot.addFile("RomanEmpire2.txt");
-        depot.addFile("RomanEmpire3.txt");
-        depot.addFile("RomanEmpire4.txt");
-        depot.addFile("RomanEmpire5.txt");
-        depot.addFile("RomanEmpire6.txt");
-
-        //Measure time
-        //1
-        long startTime = System.nanoTime();
-        Scanner scanner = new Scanner(new File("Nostromo.txt"));
-        scanner.useDelimiter("[^a-zA-Z]+");
-        while (scanner.hasNextLine())
-        {
-            try {
-                String word = scanner.next();
-                System.out.println(word);
-                depot.removeWord(word);
-            }catch (Exception e)
-            {
-            }
-        }
-        scanner.close();
-        long endTime = System.nanoTime();
-        long resultInMilliSeconds = (endTime - startTime) / 1000000;
-        System.out.println(resultInMilliSeconds);
     }
 }

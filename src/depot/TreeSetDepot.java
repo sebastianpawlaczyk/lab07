@@ -1,12 +1,11 @@
 package depot;
 
 import java.io.*;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class TreeSetDepot extends WordsDepot implements java.io.Serializable
 {
-    private class WordAndCounter implements Comparable<WordAndCounter>
+    private class WordAndCounter implements Comparable<WordAndCounter>, java.io.Serializable
     {
         public WordAndCounter(String word)
         {
@@ -108,25 +107,5 @@ public class TreeSetDepot extends WordsDepot implements java.io.Serializable
         depot = (TreeSetDepot) in.readObject();
         in.close();
         fileIn.close();
-    }
-
-    public static void main(String args[]) throws Exception
-    {
-        WordsDepot depot = new TreeSetDepot();
-
-        depot.addFile("RomanEmpire1.txt");
-        depot.addFile("RomanEmpire2.txt");
-        depot.addFile("RomanEmpire3.txt");
-        depot.addFile("RomanEmpire4.txt");
-        depot.addFile("RomanEmpire5.txt");
-        depot.addFile("RomanEmpire6.txt");
-
-        //Measure time
-        //1
-        long startTime = System.nanoTime();
-        depot.addFile("RomanEmpire.txt");
-        long endTime = System.nanoTime();
-        long resultInMilliSeconds = (endTime - startTime) / 1000000;
-        System.out.println(resultInMilliSeconds);
     }
 }

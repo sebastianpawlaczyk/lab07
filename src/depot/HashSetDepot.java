@@ -1,48 +1,37 @@
 package depot;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class HashSetDepot extends WordsDepot implements java.io.Serializable
 {
-    private class WordAndCounter
-    {
-        public WordAndCounter(String word)
-        {
-            word_ = word;
-            counter_ = 1;
-        }
-        public String word_;
-        int counter_;
-    }
-
-    private Set<WordAndCounter> wordsHasSet_ = new HashSet<>();
+    private Set<WordCounter> wordsHasSet_ = new HashSet<>();
 
     @Override
     public void addWord(String word)
     {
-        word = word.toLowerCase();
-
-        for (WordAndCounter it : wordsHasSet_)
+        WordCounter w = new WordCounter(word);
+        for (WordCounter it : wordsHasSet_)
         {
-            if (it.word_.equals(word))
+            if (it.getWord().equals(word))
             {
-                it.counter_++;
+                it.increment();
                 return;
             }
         }
-        wordsHasSet_.add(new WordAndCounter(word));
+
+        wordsHasSet_.add(w);
     }
 
     @Override
     public void removeWord(String word)
     {
-        for (WordAndCounter it : wordsHasSet_)
-        {
-            if (it.word_.equals(word))
+        WordCounter w = new WordCounter(word);
+        for (WordCounter it : wordsHasSet_) {
+            if (it.getWord().equals(word))
             {
-                it.counter_ = 0;
+                wordsHasSet_.remove(w);
+                return;
             }
         }
     }
@@ -50,16 +39,13 @@ public class HashSetDepot extends WordsDepot implements java.io.Serializable
     @Override
     public int wordOccurenceCount(String word)
     {
-        word  = word.toLowerCase();
-
-        for (WordAndCounter it : wordsHasSet_)
+        for (WordCounter it : wordsHasSet_)
         {
-            if (it.word_.equals(word))
+            if (it.getWord().equals(word))
             {
-                return it.counter_;
+                return it.getCounter();
             }
         }
-
         return 0;
     }
 
@@ -67,16 +53,13 @@ public class HashSetDepot extends WordsDepot implements java.io.Serializable
     public int patternOccurenceCount(String pattern)
     {
         int counter = 0;
-        pattern = pattern.toLowerCase();
-
-        for (WordAndCounter it : wordsHasSet_)
+        for (WordCounter it : wordsHasSet_)
         {
-            if (it.word_.contains(pattern))
+            if (it.getWord().contains(pattern))
             {
-                counter = counter + it.counter_;
+                counter = counter + it.getCounter();
             }
         }
-
         return counter;
     }
 
@@ -99,25 +82,5 @@ public class HashSetDepot extends WordsDepot implements java.io.Serializable
         depot = (HashSetDepot) in.readObject();
         in.close();
         fileIn.close();
-    }
-
-    public static void main(String args[]) throws Exception
-    {
-        WordsDepot depot = new HashSetDepot();
-
-        depot.addFile("RomanEmpire1.txt");
-        depot.addFile("RomanEmpire2.txt");
-        depot.addFile("RomanEmpire3.txt");
-        depot.addFile("RomanEmpire4.txt");
-        depot.addFile("RomanEmpire5.txt");
-        depot.addFile("RomanEmpire6.txt");
-
-        //Measure time
-        //1
-        long startTime = System.nanoTime();
-        System.out.println(depot.patternOccurenceCount("no"));
-        long endTime = System.nanoTime();
-        long resultInMilliSeconds = (endTime - startTime) / 1000000;
-        System.out.println(resultInMilliSeconds);
     }
 }
